@@ -15,18 +15,29 @@ phases:
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
       - VERSION=$(cat version.txt)
-      - echo Build started on `date`
-      - echo Building the Docker image...
+      - echo "Build started on `date`"
+      - echo "Building the Docker image..."
       - docker build -t $ECR_REPOSITORY_URI:latest -t $ECR_REPOSITORY_URI:$IMAGE_TAG -t $ECR_REPOSITORY_URI:$VERSION .
   post_build:
     commands:
-      - echo Build completed on `date`
-      - echo Pushing the Docker images...
+      - echo "Build completed on `date`"
+      - echo "Pushing the Docker images..."
       - docker push $ECR_REPOSITORY_URI:latest
       - docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
       - docker push $ECR_REPOSITORY_URI:$VERSION
       - ECR_REPOSITORY_URI_TAG=$ECR_REPOSITORY_URI:$IMAGE_TAG
       - echo ${ECR_REPOSITORY_URI_TAG}
-      - echo "Uploading to CHANGELOG ...."
-      - aws s3 cp CHANGELOG.md s3://houndoc-changelog/MD/AIForms.md
-      - aws cloudfront create-invalidation --distribution-id EIRU1D5WYXMJD --paths "/*"
+      - |
+        if echo "$VERSION" | grep -Eq -- "-dev\.[0-9]+$"; then
+          echo "Versión de desarrollo detectada ($VERSION). Omitiendo actualizaciones de DynamoDB, local CHANGELOG y Cloudfront."
+        else
+          echo "Versión estable detectada ($VERSION)."
+          echo "Actualizando versión de AIForms en la tabla houndoc_component_master..."
+          aws dynamodb update-item --table-name houndoc_component_master --key '{"component": { "S": "AIForms" } }' --update-expression "SET version = :v" --expression-attribute-values "{\":v\": {\"S\": \"$VERSION\"}}" --region $AWS_DEFAULT_REGION
+          echo "Actualizando versión de AIForms en la tabla houndoc_product_master..."
+          PRODUCT_VERSION=$(echo $VERSION | cut -d. -f1,2)
+          aws dynamodb update-item --table-name houndoc_product_master --key '{ "product": { "S": "AiForms" } }' --update-expression "SET version = :v" --expression-attribute-values "{\":v\": { \"S\": \"$PRODUCT_VERSION\" } }" --region $AWS_DEFAULT_REGION
+          echo "Uploading to CHANGELOG ...."
+          aws s3 cp CHANGELOG.md s3://houndoc-changelog/MD/AIForms.md
+          aws cloudfront create-invalidation --distribution-id EIRU1D5WYXMJD --paths "/*"
+        fi
