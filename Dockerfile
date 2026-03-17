@@ -1,4 +1,4 @@
-FROM jhpyle/docassemble-os
+FROM 874641912777.dkr.ecr.us-east-1.amazonaws.com/docassemble-os:latest
 USER root
 COPY . /tmp/docassemble/
 RUN DEBIAN_FRONTEND=noninteractive TERM=xterm LC_CTYPE=C.UTF-8 LANG=C.UTF-8 \
