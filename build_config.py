@@ -45,15 +45,19 @@ def render_config(template_path: Path, output_path: Path, env_vars: dict[str, st
 
     content = template_path.read_text(encoding="utf-8")
 
-    # Patrón para detectar {{ VAR_NAME }}
-    pattern = re.compile(r'(?<!\{)\{\s*\{?\s*(\w+)\s*\}?\s*\}(?!\})')
+    # Patrón para detectar {{ VAR_NAME }} o {{ VAR_NAME | default_value }}
+    # Solo doble llave estricta, con o sin espacios internos
+    pattern = re.compile(r'\{\{\s*(\w+)(?:\s*\|\s*([^}]*?))?\s*\}\}')
 
     def replacer(match: re.Match) -> str:
         var_name = match.group(1)
+        default_value = match.group(2).strip() if match.group(2) is not None else None
         if var_name in env_vars:
             return env_vars[var_name]
-        # Si no existe la variable, dejar el placeholder como advertencia
-        print(f"[WARN] Variable '{var_name}' no encontrada en .env")
+        if default_value is not None:
+            return default_value
+        # Sin variable en .env y sin default: dejar el placeholder como advertencia
+        print(f"[WARN] Variable '{var_name}' no encontrada en .env y sin valor por defecto")
         return match.group(0)
 
     rendered = pattern.sub(replacer, content)

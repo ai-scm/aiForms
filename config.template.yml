@@ -15,21 +15,21 @@ celery processes: null
 collect statistics: false
 config from: null
 cross site domains:
-  - { { CROSS_SITE_DOMAINS } }
+  - {{CROSS_SITE_DOMAINS|*}}
 csrf protection: false
 db:
   backup: true
-  host: ${DB_HOST}
-  name: ${DB_NAME}
-  password: ${DB_PASSWORD}
-  port: ${DB_PORT}
+  host: {{DB_HOST|null}}
+  name: {{DB_NAME|docassemble}}
+  password: {{DB_PASSWORD|docassemble}}
+  port: {{DB_PORT|null}}
   prefix: postgresql+psycopg2://
-  user: ${DB_USER}
+  user: {{DB_USER|docassemble}}
 
 debug: true
 default admin account:
-  email: { { ADMIN_EMAIL } }
-  password: { { ADMIN_PASSWORD } }
+  email: {{ADMIN_EMAIL|admin@example.com}}
+  password: {{ADMIN_PASSWORD|changeme}}
 default icons: font awesome
 default interview: docassemble.base:data/questions/default-interview.yml
 default short title: doc
@@ -79,21 +79,21 @@ oauth:
   keycloak:
     enable: true
     display name: "Iniciar sesión con Houndoc"
-    id: "{{KEYCLOAK_CLIENT_ID}}"
-    secret: "{{KEYCLOAK_CLIENT_SECRET}}"
-    client_id: "{{KEYCLOAK_CLIENT_ID}}"
-    client id: "{{KEYCLOAK_CLIENT_ID}}"
-    key: "{{KEYCLOAK_CLIENT_ID}}"
-    client_secret: "{{KEYCLOAK_CLIENT_SECRET}}"
-    client secret: "{{KEYCLOAK_CLIENT_SECRET}}"
-    domain: "{{KEYCLOAK_DOMAIN}}"
-    realm: "{{KEYCLOAK_REALM}}"
-    authorization_url: "https://{{KEYCLOAK_DOMAIN}}/realms/{{KEYCLOAK_REALM}}/protocol/openid-connect/auth"
-    token_url: "https://{{KEYCLOAK_DOMAIN}}/realms/{{KEYCLOAK_REALM}}/protocol/openid-connect/token"
-    userinfo_url: "https://{{KEYCLOAK_DOMAIN}}/realms/{{KEYCLOAK_REALM}}/protocol/openid-connect/userinfo"
-    authorization url: "https://{{KEYCLOAK_DOMAIN}}/realms/{{KEYCLOAK_REALM}}/protocol/openid-connect/auth"
-    token url: "https://{{KEYCLOAK_DOMAIN}}/realms/{{KEYCLOAK_REALM}}/protocol/openid-connect/token"
-    userinfo url: "https://{{KEYCLOAK_DOMAIN}}/realms/{{KEYCLOAK_REALM}}/protocol/openid-connect/userinfo"
+    id: "{{KEYCLOAK_CLIENT_ID|docassemble}}"
+    secret: "{{KEYCLOAK_CLIENT_SECRET|changeme}}"
+    client_id: "{{KEYCLOAK_CLIENT_ID|docassemble}}"
+    client id: "{{KEYCLOAK_CLIENT_ID|docassemble}}"
+    key: "{{KEYCLOAK_CLIENT_ID|docassemble}}"
+    client_secret: "{{KEYCLOAK_CLIENT_SECRET|changeme}}"
+    client secret: "{{KEYCLOAK_CLIENT_SECRET|changeme}}"
+    domain: "{{KEYCLOAK_DOMAIN|auth.example.com}}"
+    realm: "{{KEYCLOAK_REALM|master}}"
+    authorization_url: "https://{{KEYCLOAK_DOMAIN|auth.example.com}}/realms/{{KEYCLOAK_REALM|master}}/protocol/openid-connect/auth"
+    token_url: "https://{{KEYCLOAK_DOMAIN|auth.example.com}}/realms/{{KEYCLOAK_REALM|master}}/protocol/openid-connect/token"
+    userinfo_url: "https://{{KEYCLOAK_DOMAIN|auth.example.com}}/realms/{{KEYCLOAK_REALM|master}}/protocol/openid-connect/userinfo"
+    authorization url: "https://{{KEYCLOAK_DOMAIN|auth.example.com}}/realms/{{KEYCLOAK_REALM|master}}/protocol/openid-connect/auth"
+    token url: "https://{{KEYCLOAK_DOMAIN|auth.example.com}}/realms/{{KEYCLOAK_REALM|master}}/protocol/openid-connect/token"
+    userinfo url: "https://{{KEYCLOAK_DOMAIN|auth.example.com}}/realms/{{KEYCLOAK_REALM|master}}/protocol/openid-connect/userinfo"
     scope: "openid profile email"
     privilege_map:
       roles:
@@ -122,7 +122,7 @@ s3:
     algorithm: null
     customer algorithm: null
     customer key: null
-secretkey: { { SECRET_KEY } }
+secretkey: {{SECRET_KEY|change-me-in-production}}
 server administrator email: webmaster@localhost
 sql ping: false
 stable version: false
@@ -131,7 +131,7 @@ supervisor:
   username: null
 timezone: America/New_York
 update on start: true
-url root: { { URL_ROOT } }
+url root: {{URL_ROOT|https://localhost}}
 use cloud urls: false
 use https: false
 use lets encrypt: false
