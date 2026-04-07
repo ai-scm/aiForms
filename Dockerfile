@@ -157,3 +157,5 @@ DASUPERVISORUSERNAME="" \
 DASUPERVISORPASSWORD=""
 
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+COPY config.template.yml /tmp/config.template.yml
+COPY build_config.py /tmp/build_config.py

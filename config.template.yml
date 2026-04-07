@@ -1,0 +1,153 @@
+allow configuration editing: false
+allow demo: true
+allow embedding: true
+allow log viewing: true
+allow non-idempotent questions: false
+allow updates: true
+azure:
+  account key: null
+  account name: null
+  container: null
+  enable: false
+backup days: 14
+behind https load balancer: true
+celery processes: null
+collect statistics: false
+config from: null
+cross site domains:
+  - {{CROSS_SITE_DOMAINS|*}}
+csrf protection: false
+db:
+  backup: true
+  host: {{DB_HOST|null}}
+  name: {{DB_NAME|docassemble}}
+  password: {{DB_PASSWORD|docassemble}}
+  port: {{DB_PORT|null}}
+  prefix: postgresql+psycopg2://
+  user: {{DB_USER|docassemble}}
+
+debug: true
+default admin account:
+  email: {{ADMIN_EMAIL|admin@example.com}}
+  password: {{ADMIN_PASSWORD|changeme}}
+default icons: font awesome
+default interview: docassemble.base:data/questions/default-interview.yml
+default short title: doc
+default title: docassemble
+ec2: false
+enable playground: true
+enable unoconv: true
+exitpage: https://docassemble.org
+expose websockets: true
+external hostname: none
+gotenberg url: null
+kubernetes: false
+language: en
+lets encrypt email: null
+locale: en_US.utf8
+log server: null
+mail:
+  default sender: '"Administrator" <no-reply@example.com>'
+  password: null
+  server: localhost
+  username: null
+max celery processes: null
+new markdown to docx: true
+new template markdown behavior: true
+oauth:
+  auth0:
+    domain: example.auth0.com
+    enable: false
+    id: ceyd6imTYxTNmuj2CYpwH_cEhdWt93e6
+    secret: LLGEBDrrgDFDfBsFjErsdSdsntkrtAbfa4ee3ss_adfdSDFEWEsfgHTerjNsd3dD
+  azure:
+    enable: false
+    id: e378beb1-0bfb-45bc-9b4b-604dcf640c87
+    secret: UwHEze20pzSO+lvywJOjcos3v7Kd6Y7tsaCYTG7Panc=
+  facebook:
+    enable: false
+    id: 423759825983740
+    secret: 34993a09909c0909b9000a090d09f099
+  github:
+    enable: false
+    id: ba45316c5951436328bc
+    secret: 68e37cebd352f1ea36b6147cd52ff661c413f4b1
+  google:
+    enable: false
+    id: 23123018240-32239fj28fj4fuhf394h3984eurhfurh.apps.googleusercontent.com
+    secret: DGE34gdgerg3GDG545tgdfRf
+  keycloak:
+    enable: true
+    display name: "Iniciar sesión con Houndoc"
+    id: "{{KEYCLOAK_CLIENT_ID|docassemble}}"
+    secret: "{{KEYCLOAK_CLIENT_SECRET|changeme}}"
+    client_id: "{{KEYCLOAK_CLIENT_ID|docassemble}}"
+    client id: "{{KEYCLOAK_CLIENT_ID|docassemble}}"
+    key: "{{KEYCLOAK_CLIENT_ID|docassemble}}"
+    client_secret: "{{KEYCLOAK_CLIENT_SECRET|changeme}}"
+    client secret: "{{KEYCLOAK_CLIENT_SECRET|changeme}}"
+    domain: "{{KEYCLOAK_DOMAIN|auth.example.com}}"
+    realm: "{{KEYCLOAK_REALM|master}}"
+    authorization_url: "https://{{KEYCLOAK_DOMAIN|auth.example.com}}/realms/{{KEYCLOAK_REALM|master}}/protocol/openid-connect/auth"
+    token_url: "https://{{KEYCLOAK_DOMAIN|auth.example.com}}/realms/{{KEYCLOAK_REALM|master}}/protocol/openid-connect/token"
+    userinfo_url: "https://{{KEYCLOAK_DOMAIN|auth.example.com}}/realms/{{KEYCLOAK_REALM|master}}/protocol/openid-connect/userinfo"
+    authorization url: "https://{{KEYCLOAK_DOMAIN|auth.example.com}}/realms/{{KEYCLOAK_REALM|master}}/protocol/openid-connect/auth"
+    token url: "https://{{KEYCLOAK_DOMAIN|auth.example.com}}/realms/{{KEYCLOAK_REALM|master}}/protocol/openid-connect/token"
+    userinfo url: "https://{{KEYCLOAK_DOMAIN|auth.example.com}}/realms/{{KEYCLOAK_REALM|master}}/protocol/openid-connect/userinfo"
+    scope: "openid profile email"
+    privilege_map:
+      roles:
+        admin: admin
+        developer: developer
+        user: user
+  twitter:
+    enable: false
+    id: Iweh63ReKfOCttaUBE3t27TET
+    secret: hfieegGgrht5re3hfhsRGStYUbDDAgerergrggSDGHtrErE7rf
+os locale: en_US.UTF-8 UTF-8
+rabbitmq: null
+redis: null
+restrict input variables: true
+root: /
+root owned: false
+s3:
+  access key id: null
+  bucket: null
+  enable: false
+  endpoint url: null
+  region: null
+  secret access key: null
+  server side encryption:
+    KMS key ID: null
+    algorithm: null
+    customer algorithm: null
+    customer key: null
+secretkey: {{SECRET_KEY|change-me-in-production}}
+server administrator email: webmaster@localhost
+sql ping: false
+stable version: false
+supervisor:
+  password: null
+  username: null
+timezone: America/New_York
+update on start: true
+url root: {{URL_ROOT|https://localhost}}
+use cloud urls: false
+use https: false
+use lets encrypt: false
+use minio: false
+voicerss:
+  dialects:
+    en: us
+    es: mx
+    fr: fr
+  enable: false
+  key: ae8734983948ebc98239e9898f998432
+web server: nginx
+websockets ip: 0.0.0.0
+websockets port: 5001
+words:
+  - docassemble.base:data/sources/us-words.yml
+xsendfile: true
+initial dict:
+  multi_user: True
