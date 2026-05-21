@@ -5468,6 +5468,148 @@ def oauth_callback(provider):
     return response
 
 
+@app.route('/backchannel-logout/keycloak', methods=['POST'])
+@csrf.exempt
+def keycloak_backchannel_logout():
+    if not app.config.get('USE_KEYCLOAK_LOGIN'):
+        abort(404)
+    keycloak_config = daconfig.get('oauth', {}).get('keycloak', {})
+    if not keycloak_config:
+        abort(404)
+    logout_token = request.form.get('logout_token')
+    if not logout_token:
+        logmessage('keycloak_backchannel_logout: missing logout_token')
+        return ('', 400)
+
+    def _b64decode(s):
+        remainder = len(s) % 4
+        if remainder:
+            s += '=' * (4 - remainder)
+        return base64.urlsafe_b64decode(s)
+
+    try:
+        parts = logout_token.split('.')
+        if len(parts) != 3:
+            logmessage('keycloak_backchannel_logout: invalid JWT format')
+            return ('', 400)
+        header = json.loads(_b64decode(parts[0]).decode('utf-8'))
+        payload = json.loads(_b64decode(parts[1]).decode('utf-8'))
+    except Exception as e:
+        logmessage('keycloak_backchannel_logout: failed to decode token: ' + str(e))
+        return ('', 400)
+
+    # Validate issuer
+    protocol = keycloak_config.get('protocol', 'https://')
+    if not protocol.endswith('://'):
+        protocol += '://'
+    realm = keycloak_config.get('realm', '')
+    domain = keycloak_config.get('domain', '')
+    expected_issuer = protocol + domain + '/realms/' + realm
+    if payload.get('iss') != expected_issuer:
+        logmessage('keycloak_backchannel_logout: invalid issuer: ' + str(payload.get('iss')))
+        return ('', 400)
+
+    # Validate audience
+    aud = payload.get('aud', [])
+    if isinstance(aud, str):
+        aud = [aud]
+    if keycloak_config.get('id') not in aud:
+        logmessage('keycloak_backchannel_logout: invalid audience')
+        return ('', 400)
+
+    # Validate events claim (OIDC Back-Channel Logout spec)
+    if 'http://schemas.openid.net/event/backchannel-logout' not in payload.get('events', {}):
+        logmessage('keycloak_backchannel_logout: missing backchannel-logout event claim')
+        return ('', 400)
+
+    # Logout tokens must not contain nonce (per spec)
+    if 'nonce' in payload:
+        logmessage('keycloak_backchannel_logout: logout_token must not contain nonce')
+        return ('', 400)
+
+    # Validate token age (iat must be within 5 minutes)
+    iat = payload.get('iat', 0)
+    if time.time() - iat > 300:
+        logmessage('keycloak_backchannel_logout: token too old')
+        return ('', 400)
+
+    # Verify JWT signature using Keycloak JWKS (RS256)
+    alg = header.get('alg', 'RS256')
+    if alg == 'RS256':
+        try:
+            from Crypto.Signature import pkcs1_15
+            from Crypto.Hash import SHA256 as CryptoSHA256
+            jwks_url = expected_issuer + '/protocol/openid-connect/certs'
+            cache_key = ('da:keycloak:jwks:' + realm).encode()
+            jwks_data = r.get(cache_key)
+            if jwks_data:
+                jwks = json.loads(jwks_data.decode('utf-8'))
+            else:
+                jwks_response = requests.get(jwks_url, timeout=10)
+                jwks_response.raise_for_status()
+                jwks = jwks_response.json()
+                r.set(cache_key, json.dumps(jwks), ex=3600)
+            kid = header.get('kid')
+            rsa_key = None
+            for jwk in jwks.get('keys', []):
+                if jwk.get('kty') == 'RSA' and (kid is None or jwk.get('kid') == kid):
+                    n = int.from_bytes(_b64decode(jwk['n']), 'big')
+                    e = int.from_bytes(_b64decode(jwk['e']), 'big')
+                    rsa_key = RSA.construct((n, e))
+                    break
+            if rsa_key is None:
+                logmessage('keycloak_backchannel_logout: no matching key found in JWKS')
+                return ('', 400)
+            message = (parts[0] + '.' + parts[1]).encode('utf-8')
+            signature = _b64decode(parts[2])
+            h = CryptoSHA256.new(message)
+            pkcs1_15.new(rsa_key).verify(h, signature)
+        except Exception as e:
+            logmessage('keycloak_backchannel_logout: signature verification failed: ' + str(e))
+            return ('', 400)
+    else:
+        logmessage('keycloak_backchannel_logout: unsupported algorithm: ' + str(alg))
+        return ('', 400)
+
+    # Get subject
+    sub = payload.get('sub')
+    if not sub:
+        logmessage('keycloak_backchannel_logout: missing sub claim')
+        return ('', 400)
+
+    social_id = 'keycloak$' + str(sub)
+    user = db.session.execute(select(UserModel).filter_by(social_id=social_id)).scalar()
+    if not user:
+        logmessage('keycloak_backchannel_logout: no user found for sub ' + str(sub))
+        return ('', 200)
+
+    user_id_str = str(user.id)
+    sessions_deleted = 0
+    try:
+        for raw_key in r_store.scan_iter():
+            try:
+                raw_value = r_store.get(raw_key)
+                if raw_value is None:
+                    continue
+                try:
+                    session_dict = json.loads(raw_value.decode('utf-8'))
+                except Exception:
+                    try:
+                        session_dict = pickle.loads(raw_value)
+                    except Exception:
+                        continue
+                if str(session_dict.get('_user_id', '')) == user_id_str:
+                    r_store.delete(raw_key)
+                    sessions_deleted += 1
+            except Exception:
+                pass
+    except Exception as e:
+        logmessage('keycloak_backchannel_logout: error scanning sessions: ' + str(e))
+
+    logmessage('keycloak_backchannel_logout: user ' + str(user.email) + ' logged out, ' + str(sessions_deleted) + ' sessions deleted')
+    return ('', 200)
+
+
 @app.route('/phone_login', methods=['POST', 'GET'])
 def phone_login():
     if not app.config['USE_PHONE_LOGIN']:
