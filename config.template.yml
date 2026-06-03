@@ -10,6 +10,7 @@ azure:
   container: null
   enable: false
 backup days: 14
+device id cookie days: {{DEVICEID_COOKIE_DAYS|3640}}
 behind https load balancer: true
 celery processes: null
 collect statistics: false
