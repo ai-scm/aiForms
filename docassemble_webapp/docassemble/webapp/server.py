@@ -174,7 +174,6 @@ NoneType = type(None)
 
 STATS = daconfig.get('collect statistics', False)
 DEBUG = daconfig.get('debug', False)
-DEVICE_ID_COOKIE_DAYS = daconfig.get('device id cookie days', 520 * 7)
 ERROR_TYPES_NO_EMAIL = daconfig.get('suppress error notificiations', [])
 COOKIELESS_SESSIONS = daconfig.get('cookieless sessions', False)
 BAN_IP_ADDRESSES = daconfig.get('ip address ban enabled', True)
@@ -7107,7 +7106,7 @@ def make_response_wrapper(set_cookie, secret, set_device_id, device_id, expire_v
         if expire_visitor_secret:
             response.set_cookie('visitor_secret', '', expires=0)
         if set_device_id:
-            response.set_cookie('ds', device_id, httponly=True, secure=app.config['SESSION_COOKIE_SECURE'], samesite=app.config['SESSION_COOKIE_SAMESITE'], expires=datetime.datetime.now() + datetime.timedelta(days=DEVICE_ID_COOKIE_DAYS))
+            response.set_cookie('ds', device_id, httponly=True, secure=app.config['SESSION_COOKIE_SECURE'], samesite=app.config['SESSION_COOKIE_SAMESITE'])
     return the_wrapper
 
 
