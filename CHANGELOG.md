@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.2.4] - 2026-06-03
+### Changed
+- **Device ID cookie configuration:** Removed the device ID cookie days configuration in favor of a simplified setup.
+
+## [1.2.3] - 2026-06-03
+### Added
+- **Logging:** Added logging of the `DEVICE_ID_COOKIE_DAYS` value for improved observability.
+
+## [1.2.2] - 2026-06-02
+### Added
+- **Configurable device ID cookie:** Made the device ID cookie expiration configurable via `config.yml`.
+
+## [1.2.1] - 2026-05-21
+### Added
+- **Keycloak backchannel logout:** Implemented the Keycloak backchannel logout endpoint.
+
 ## [1.2.0] - 2026-04-07
 ### Changed
 - **Template update:** Update config files on infrastructure repository to reflect changes in the config template, ensuring consistency across environments.
